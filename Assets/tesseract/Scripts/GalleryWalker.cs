@@ -50,6 +50,7 @@ public class GalleryWalker : MonoBehaviour {
             float speed = Mathf.Lerp (_velocity.magnitude, walkSpeed, Time.deltaTime * damping);
             _velocity = direction.normalized * speed;
         } else {
+            // TODO: Deccelerative lerp
             _velocity = Vector3.zero;
         }
 
@@ -58,7 +59,9 @@ public class GalleryWalker : MonoBehaviour {
 
     void MoveToGround() {
         RaycastHit hit;
-        if(Physics.Raycast (root.position, -root.up, out hit)) {
+        int layerMask = 1 << 8;
+        layerMask = ~layerMask;
+        if(Physics.Raycast (root.position, -root.up, out hit, Mathf.Infinity, layerMask)) {
             Vector3 delta = root.position - hit.point;
             root.position = hit.point + delta.normalized;
         }
