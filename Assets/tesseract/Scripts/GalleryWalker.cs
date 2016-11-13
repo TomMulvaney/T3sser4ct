@@ -33,33 +33,26 @@ public class GalleryWalker : MonoBehaviour {
 	void Update () {
         Vector3 direction = Vector3.zero;
 
-        bool hasPressed = false;
-
         if (Input.GetMouseButton (0) || Input.GetKey (KeyCode.W) || Input.GetKey (KeyCode.UpArrow)) {
             direction += root.forward;
-            hasPressed = true;
         } 
         if (Input.GetKey (KeyCode.S) || Input.GetKey (KeyCode.DownArrow)) {
             direction -= root.forward;
-            hasPressed = true;
         }
         if (Input.GetKey (KeyCode.A) || Input.GetKey (KeyCode.LeftArrow)) {
             direction -= root.right;
-            hasPressed = true;
         }
         if (Input.GetKey (KeyCode.D) || Input.GetKey (KeyCode.RightArrow)) {
             direction += root.right;
-            hasPressed = true;
-        }
-
-        if (!hasPressed) {
-            _velocity.x = 0;
-            _velocity.z = 0;
         }
 
         if(Vector3.Distance (direction, Vector3.zero) > 0.01f) {
             float speed = Mathf.Lerp (_velocity.magnitude, walkSpeed, Time.deltaTime * damping);
             _velocity = direction.normalized * speed;
+        } else {
+            //StopHorizontal ();
+            _velocity.x = 0;
+            _velocity.z = 0;
         }
 
         float rayDistance = 1.1f;
@@ -77,12 +70,31 @@ public class GalleryWalker : MonoBehaviour {
         control.Move (_velocity * Time.deltaTime);
 	}
 
+    void StopHorizontal() {
+        
+    }
+
+    bool IsUpX() {
+        return Mathf.Approximately (Mathf.Abs (Vector3.Dot (root.up, Vector3.left)), 1f);
+    }
+
+    bool IsUpY() {
+        return Mathf.Approximately (Mathf.Abs (Vector3.Dot (root.up, Vector3.up)), 1f);
+    }
+
+    bool IsUpZ() {
+        return Mathf.Approximately (Mathf.Abs (Vector3.Dot (root.up, Vector3.forward)), 1f);
+    }
+
     void OnGUI () {
         if (showGUI) {
             GUILayout.Label (string.Format ("Forward: {0}", root.forward));
             GUILayout.Label (string.Format ("Right: {0}", root.right));
             GUILayout.Label (string.Format ("Velocity: {0}", _velocity));
             GUILayout.Label (string.Format ("Speed: {0}", _velocity.magnitude));
+            GUILayout.Label (string.Format ("IsUpX: {0}", IsUpX ()));
+            GUILayout.Label (string.Format ("IsUpY: {0}", IsUpY ()));
+            GUILayout.Label (string.Format ("IsUpZ: {0}", IsUpZ ()));
         }
     }
 }
