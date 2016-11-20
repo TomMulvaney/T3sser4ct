@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class GalleryWalkerGrav : MonoBehaviour {
+public class GalleryWalkerForward : MonoBehaviour {
     [SerializeField]
     private bool showGUI;
     [SerializeField]
@@ -11,11 +11,13 @@ public class GalleryWalkerGrav : MonoBehaviour {
     [SerializeField]
     private float damping = 1f;
     [SerializeField]
-    private float gravity = 10f;
-    [SerializeField]
     private CharacterController control;
 
     private Vector3 _velocity = Vector3.zero;
+
+    bool canRotate = true;
+    Vector3 origPos;
+    Vector3 origUp;
 
 
     // Use this for initialization
@@ -27,19 +29,29 @@ public class GalleryWalkerGrav : MonoBehaviour {
         if (control == null) {
             control = GetComponent<CharacterController> ();
         }
-    }
 
-    // TODO: Combine separate grav and walk velocities
+        Debug.Log (root.eulerAngles);
+        Debug.Log (root.up);
+        Debug.Log (root.forward);
+
+        MoveToGround ();
+    }
 
     // Update is called once per frame
     void Update () {
+        if (Input.GetKeyDown (KeyCode.P)) {
+            MoveToGround ();
+        }
+
+        CheckRotation ();
+
         Vector3 direction = Vector3.zero;
 
         if (Input.GetMouseButton (0) || Input.GetKey (KeyCode.W) || Input.GetKey (KeyCode.UpArrow)) {
-            direction += root.forward;
+            direction += root.up;
         } 
         if (Input.GetKey (KeyCode.S) || Input.GetKey (KeyCode.DownArrow)) {
-            direction -= root.forward;
+            direction -= root.up;
         }
         if (Input.GetKey (KeyCode.A) || Input.GetKey (KeyCode.LeftArrow)) {
             direction -= root.right;
@@ -52,53 +64,48 @@ public class GalleryWalkerGrav : MonoBehaviour {
             float speed = Mathf.Lerp (_velocity.magnitude, walkSpeed, Time.deltaTime * damping);
             _velocity = direction.normalized * speed;
         } else {
-            //StopHorizontal ();
-            _velocity.x = 0;
-            _velocity.z = 0;
+            // TODO: Deccelerative lerp
+            _velocity = Vector3.zero;
         }
 
-        float rayDistance = 1.1f;
+        if (canRotate)
+            control.Move (_velocity * Time.deltaTime);
+    }
+
+    void CheckRotation() {
+        float rayDistance = 0.7f;
+        //      Debug.DrawLine (root.position, root.position - (root.forward * rayDistance));
+        RaycastHit hit;
+        int layerMask = 1 << 9;
+
+        Debug.DrawRay (root.position, root.forward);
+        Debug.DrawRay (root.position, root.forward);
+        Debug.DrawRay (root.position, -root.forward);
+
+        if(Physics.Raycast (root.position, -root.forward, out hit, rayDistance, layerMask)) {
+            if (canRotate) {
+                root.rotation = Quaternion.FromToRotation (root.forward, hit.normal);
+                canRotate = false;
+            }
+        }
+    }
+
+    void MoveToGround() {
+        RaycastHit hit;
         int layerMask = 1 << 8;
         layerMask = ~layerMask;
-
-        Debug.DrawLine (root.position, root.position - (root.up * rayDistance));
-        RaycastHit hit;
-        if(Physics.Raycast (root.position, -root.up, out hit, rayDistance, layerMask)) {
-            _velocity.y = 0;
-        } else {
-            _velocity.y = -gravity;
+        if(Physics.Raycast (root.position, -root.forward, out hit, Mathf.Infinity, layerMask)) {
+            Vector3 delta = root.position - hit.point;
+            root.position = hit.point + delta.normalized;
         }
-
-        // TODO: Combine separate grav and walk velocities
-
-        control.Move (_velocity * Time.deltaTime);
-    }
-
-    void StopHorizontal() {
-
-    }
-
-    bool IsUpX() {
-        return Mathf.Approximately (Mathf.Abs (Vector3.Dot (root.up, Vector3.left)), 1f);
-    }
-
-    bool IsUpY() {
-        return Mathf.Approximately (Mathf.Abs (Vector3.Dot (root.up, Vector3.up)), 1f);
-    }
-
-    bool IsUpZ() {
-        return Mathf.Approximately (Mathf.Abs (Vector3.Dot (root.up, Vector3.forward)), 1f);
     }
 
     void OnGUI () {
         if (showGUI) {
-            GUILayout.Label (string.Format ("Forward: {0}", root.forward));
+            GUILayout.Label (string.Format ("Forward: {0}", root.up));
             GUILayout.Label (string.Format ("Right: {0}", root.right));
             GUILayout.Label (string.Format ("Velocity: {0}", _velocity));
             GUILayout.Label (string.Format ("Speed: {0}", _velocity.magnitude));
-            GUILayout.Label (string.Format ("IsUpX: {0}", IsUpX ()));
-            GUILayout.Label (string.Format ("IsUpY: {0}", IsUpY ()));
-            GUILayout.Label (string.Format ("IsUpZ: {0}", IsUpZ ()));
         }
     }
 }
