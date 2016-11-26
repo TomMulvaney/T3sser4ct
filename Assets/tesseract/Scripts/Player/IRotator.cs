@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public interface IWallRotate {
+public interface IRotator {
     void Init(Transform root);
     void TryRotate ();
 }

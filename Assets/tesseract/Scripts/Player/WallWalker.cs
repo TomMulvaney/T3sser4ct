@@ -13,8 +13,9 @@ public class WallWalker : MonoBehaviour {
     [SerializeField]
     private float gravity = 10f;
 
+    private IDirection director;
     private IMover mover;
-    private IWallRotate rotator;
+    private IRotator rotator;
 
     private Vector3 walkVelocity = Vector3.zero;
     private Vector3 gravVelocity = Vector3.zero;
@@ -26,20 +27,28 @@ public class WallWalker : MonoBehaviour {
             root = transform;
         }
 
+        Component directionComponent = gameObject.GetComponent (typeof(IDirection));
+        if (directionComponent != null) {
+            director = directionComponent as IDirection;
+            director.Init (root);
+        } else {
+            Debug.LogError ("Cannot find IDirection");
+        }
+
         Component moverComponent = gameObject.GetComponent (typeof(IMover));
         if (moverComponent != null) {
             mover = moverComponent as IMover;
             mover.Init (root);
         } else {
-            Debug.LogError ("Cannot find mover");
+            Debug.LogError ("Cannot find IMover");
         }
 
-        Component rotatorComponent = gameObject.GetComponent (typeof(IWallRotate));
+        Component rotatorComponent = gameObject.GetComponent (typeof(IRotator));
         if (rotatorComponent != null) {
-            rotator = rotatorComponent as IWallRotate;
+            rotator = rotatorComponent as IRotator;
             rotator.Init (root);
         } else {
-            Debug.LogWarning ("Cannot find rotator");
+            Debug.LogWarning ("Cannot find IRotator");
         }
 	}
 	
@@ -54,21 +63,7 @@ public class WallWalker : MonoBehaviour {
             rotator.TryRotate ();
         }
 
-        Vector3 direction = Vector3.zero;
-
-        // TODO: Reading input here is vile, cannot support multiple control schemes and NPCs. Use an interface which returns direction Vector3
-        if (Input.GetMouseButton (0) || Input.GetKey (KeyCode.W) || Input.GetKey (KeyCode.UpArrow)) {
-            direction += root.forward;
-        } 
-        if (Input.GetKey (KeyCode.S) || Input.GetKey (KeyCode.DownArrow)) {
-            direction -= root.forward;
-        }
-        if (Input.GetKey (KeyCode.A) || Input.GetKey (KeyCode.LeftArrow)) {
-            direction -= root.right;
-        }
-        if (Input.GetKey (KeyCode.D) || Input.GetKey (KeyCode.RightArrow)) {
-            direction += root.right;
-        }
+        Vector3 direction = director.GetDirection ();
 
         if(Vector3.Distance (direction, Vector3.zero) > 0.01f) {
             float speed = Mathf.Lerp (walkVelocity.magnitude, walkSpeed, Time.deltaTime * damping);

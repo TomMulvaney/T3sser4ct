@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class WallRotateSlope : MonoBehaviour, IWallRotate {
+public class RotatorSlope : MonoBehaviour, IRotator {
     [SerializeField]
     private float lerpSpeed = 10;
     [SerializeField]
