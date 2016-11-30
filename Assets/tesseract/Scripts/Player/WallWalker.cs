@@ -27,29 +27,41 @@ public class WallWalker : MonoBehaviour {
             root = transform;
         }
 
-        Component directionComponent = gameObject.GetComponent (typeof(IDirection));
-        if (directionComponent != null) {
-            director = directionComponent as IDirection;
-            director.Init (root);
-        } else {
+        director = gameObject.GetComponentInChildren<IDirection>();
+        if (director == null) {
             Debug.LogError ("Cannot find IDirection");
         }
 
-        Component moverComponent = gameObject.GetComponent (typeof(IMover));
-        if (moverComponent != null) {
-            mover = moverComponent as IMover;
-            mover.Init (root);
-        } else {
+        mover = gameObject.GetComponentInChildren<IMover>();
+        if (mover == null) {
             Debug.LogError ("Cannot find IMover");
         }
 
-        Component rotatorComponent = gameObject.GetComponent (typeof(IRotator));
-        if (rotatorComponent != null) {
-            rotator = rotatorComponent as IRotator;
-            rotator.Init (root);
-        } else {
-            Debug.LogWarning ("Cannot find IRotator");
+        rotator = gameObject.GetComponentInChildren<IRotator>();
+        if (rotator == null) {
+            Debug.LogError ("Cannot find IRotator");
         }
+
+//        Component directionComponent = gameObject.GetComponentInChildren (typeof(IDirection));
+//        if (directionComponent != null) {
+//            director = directionComponent as IDirection;
+//        } else {
+//            Debug.LogError ("Cannot find IDirection");
+//        }
+//
+//        Component moverComponent = gameObject.GetComponent (typeof(IMover));
+//        if (moverComponent != null) {
+//            mover = moverComponent as IMover;
+//        } else {
+//            Debug.LogError ("Cannot find IMover");
+//        }
+//
+//        Component rotatorComponent = gameObject.GetComponent (typeof(IRotator));
+//        if (rotatorComponent != null) {
+//            rotator = rotatorComponent as IRotator;
+//        } else {
+//            Debug.LogWarning ("Cannot find IRotator");
+//        }
 	}
 	
 	// Update is called once per frame
@@ -63,7 +75,7 @@ public class WallWalker : MonoBehaviour {
             rotator.TryRotate ();
         }
 
-        Vector3 direction = director.GetDirection ();
+        Vector3 direction = director != null ? director.GetDirection () : Vector3.zero;
 
         if(Vector3.Distance (direction, Vector3.zero) > 0.01f) {
             float speed = Mathf.Lerp (walkVelocity.magnitude, walkSpeed, Time.deltaTime * damping);

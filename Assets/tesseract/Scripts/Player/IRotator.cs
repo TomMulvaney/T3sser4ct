@@ -2,6 +2,6 @@
 using System.Collections;
 
 public interface IRotator {
-    void Init(Transform root);
+    void SetRoot(Transform root);
     void TryRotate ();
 }

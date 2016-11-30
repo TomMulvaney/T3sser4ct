@@ -2,6 +2,6 @@
 using System.Collections;
 
 public interface IDirection {
-    void Init (Transform root);
+    void SetRoot (Transform root);
     Vector3 GetDirection();
 }

@@ -7,6 +7,8 @@ public class RotatorSlope : MonoBehaviour, IRotator {
     [SerializeField]
     private float rayDistance = 0.7f;
     [SerializeField]
+    private bool useLayerMask = false;
+    [SerializeField]
     private int lowLayerMask = 1;
     [SerializeField]
     private int highLayerMask = 9;
@@ -18,9 +20,14 @@ public class RotatorSlope : MonoBehaviour, IRotator {
     Transform root;
     Vector3 myNormal;
 
-    public void Init(Transform newRoot) {
+    void Start() {
+        if (root == null) {
+            root = transform;
+        }
+    }
+
+    public void SetRoot(Transform newRoot) {
         root = newRoot;
-        myNormal = root.up;
     }
 
     public void TryRotate () {
@@ -36,7 +43,11 @@ public class RotatorSlope : MonoBehaviour, IRotator {
             Debug.DrawRay (root.position, -root.up);
         }
 
-        if(Physics.Raycast (root.position, -root.up, out hit, rayDistance, layerMask)) {
+        bool hasHit = useLayerMask ? 
+            Physics.Raycast (root.position, -root.up, out hit, rayDistance, layerMask) : 
+            Physics.Raycast (root.position, -root.up, out hit, rayDistance);
+
+        if(hasHit) {
             myNormal = Vector3.Lerp(myNormal, hit.normal, lerpSpeed*Time.deltaTime);
             // find forward direction with new myNormal:
             var myForward = Vector3.Cross(root.right, myNormal);

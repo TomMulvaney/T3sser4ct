@@ -4,7 +4,13 @@ using System.Collections;
 public class DirectionWASD : MonoBehaviour, IDirection {
     Transform root;
 
-    public void Init (Transform newRoot) {
+    public void Start() {
+        if (root == null) {
+            root = transform;
+        }
+    }
+
+    public void SetRoot (Transform newRoot) {
         root = newRoot;
 	}
 	
