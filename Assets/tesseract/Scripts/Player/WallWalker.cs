@@ -41,38 +41,13 @@ public class WallWalker : MonoBehaviour {
         if (rotator == null) {
             Debug.LogError ("Cannot find IRotator");
         }
-
-//        Component directionComponent = gameObject.GetComponentInChildren (typeof(IDirection));
-//        if (directionComponent != null) {
-//            director = directionComponent as IDirection;
-//        } else {
-//            Debug.LogError ("Cannot find IDirection");
-//        }
-//
-//        Component moverComponent = gameObject.GetComponent (typeof(IMover));
-//        if (moverComponent != null) {
-//            mover = moverComponent as IMover;
-//        } else {
-//            Debug.LogError ("Cannot find IMover");
-//        }
-//
-//        Component rotatorComponent = gameObject.GetComponent (typeof(IRotator));
-//        if (rotatorComponent != null) {
-//            rotator = rotatorComponent as IRotator;
-//        } else {
-//            Debug.LogWarning ("Cannot find IRotator");
-//        }
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
         // TODO: Delete dirty hack before gravity is implemented
         if (Input.GetKeyDown (KeyCode.P)) {
             MoveToGround ();
-        }
-
-        if (rotator != null) {
-            rotator.TryRotate ();
         }
 
         Vector3 direction = director != null ? director.GetDirection () : Vector3.zero;
@@ -87,23 +62,31 @@ public class WallWalker : MonoBehaviour {
 
         // TODO: Gravity
         // TODO: Don't hardcode rayDistance, layerMask and invertLayerMask
-//        float rayDistance = 1.1f;
-//        int layerMask = 1 << 8;
-//        layerMask = ~layerMask;
-//
-//        Debug.DrawLine (root.position, root.position - (root.up * rayDistance));
-//        RaycastHit hit;
-//        if(Physics.Raycast (root.position, -root.up, out hit, rayDistance, layerMask)) {
-//            gravVelocity = Vector3.zero;
-//        } else {
-//            gravVelocity += (-root.up * gravity);
-//        }
+        float rayDistance = 1.1f;
+        int layerMask = 1 << 8;
+        layerMask = ~layerMask;
+
+        Debug.DrawLine (root.position, root.position - (root.up * rayDistance));
+        RaycastHit hit;
+        if(Physics.Raycast (root.position, -root.up, out hit, rayDistance, layerMask)) {
+            gravVelocity = Vector3.zero;
+        } else {
+            gravVelocity += (-root.up * gravity);
+        }
 
         velocity = walkVelocity + gravVelocity;
 
         if (mover != null) {
+            Quaternion rot = transform.rotation;
             mover.Move (velocity);
+            transform.rotation = rot;
         }
+
+        if (rotator != null) {
+            rotator.TryRotate (velocity.normalized);
+        }
+
+
 	}
 
     void OnGUI () {

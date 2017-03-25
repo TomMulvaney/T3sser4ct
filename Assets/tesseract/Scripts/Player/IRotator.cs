@@ -2,6 +2,5 @@
 using System.Collections;
 
 public interface IRotator {
-    void SetRoot(Transform root);
-    void TryRotate ();
+    void TryRotate (Vector3 moveDir);
 }

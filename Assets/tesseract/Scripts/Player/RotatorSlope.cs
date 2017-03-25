@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class RotatorSlope : MonoBehaviour, IRotator {
+// Old
+
+public class RotatorSlope : MonoBehaviour {
     [SerializeField]
     private float lerpSpeed = 10;
     [SerializeField]
